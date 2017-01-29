@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html lang="en-us">
+
+  <head>
+
+    <meta charset="UTF-8">
+    <title>Sign-Up Today!</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- LINK TO FIREBASE GOES HERE -->
+
+    <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <br>
+
+      <!-- Jumbotron -->
+      <div class="jumbotron">
+        <h1 class="text-center">Today's Train Schedule</h1>
+      </div>
+
+      <div class="row">
+
+        <!-- Sign-Up Panel-->
+        <div class="col-lg-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">New Train Information</h3>
+            </div>
+
+            <div class="panel-body">
+
+              <!-- Sign-up Form (note the various input "types")-->
+              <form role="form">
+                <div class="form-group">
+                  <label for="name-input">Train Name:</label>
+                  <input class="form-control" id="name-input" type="text">
+                </div>
+                <div class="form-group">
+                  <label for="destination-input">Train Destination:</label>
+                  <input class="form-control" id="destination-input" type="text">
+                </div>
+                <div class="form-group">
+                  <label for="first-input">First Train:</label>
+                  <input class="form-control" id="first-input" type="time">
+                </div>
+                <div class="form-group">
+                 <label for="frequency-input">Train Frequency</label>
+                 <input class="form-control" id="frequency-input" type="time">
+                 </div>
+                <button class="btn btn-default" id="add-train" type="submit">Submit</button>
+              </form>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Most Recent Member Panel -->
+        <div class="col-lg-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Most Recent Train</h3>
+            </div>
+            <div class="panel-body" id="recent-member">
+              <h2 id="name-display"></h2>
+              <h4 id="destination-display"></h4>
+              <h4 id="first-display"></h4>
+              <p id="frequency-display"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wells for displaying all users -->
+        <div class="col-lg-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">All Trains</h3>
+            </div>
+            <div class="panel-body">
+                <div id="full-train-list"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+
+    <!-- Script -->
+
+    <script src="https://www.gstatic.com/firebasejs/3.6.7/firebase.js"></script>
+
+
+    <script>
+  // Initialize Firebase
+        var config = {
+        apiKey: "AIzaSyDFQgB5VSYWnQ9jV4oBs0PQGgs73QTnogc",
+        authDomain: "trainproject-bae61.firebaseapp.com",
+        databaseURL: "https://trainproject-bae61.firebaseio.com",
+        storageBucket: "trainproject-bae61.appspot.com",
+        messagingSenderId: "173082786953"
+      };
+        firebase.initializeApp(config);
+
+
+      var dataRef = firebase.database();
+
+    // Initial Values
+    var train = "";
+    var destination = "";
+    var first = 0;
+    var frequency = 0;
+
+    // Capture Button Click
+    $("#add-train").on("click", function(event) {
+      event.preventDefault();
+
+      // YOUR TASK!!!
+      // Code in the logic for storing and retrieving the most recent user.
+      // Don't forget to provide initial data to your Firebase database.
+      train = $("#name-input").val().trim();
+      destination = $("#destination-input").val().trim();
+      first = $("#first-input").val().trim();
+      frequency = $("#frequency-input").val().trim();
+
+      // Code for the push
+      dataRef.ref().push({
+
+        name: train,
+        destination: destination,
+        first: first,
+        frequency: frequency,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP
+      });
+    });
+
+    // Firebase watcher + initial loader HINT: This code behaves similarly to .on("value")
+    dataRef.ref().on("child_added", function(childSnapshot) {
+
+      // Log everything that's coming out of snapshot
+      console.log(childSnapshot.val().name);
+      console.log(childSnapshot.val().name);
+      console.log(childSnapshot.val().destination);
+      console.log(childSnapshot.val().first);
+      console.log(childSnapshot.val().frequency);
+      console.log(childSnapshot.val().joinDate);
+
+      // full list of items to the well
+      $("#full-train-list").append("<div class='well'><span id='name'> " + childSnapshot.val().name +
+        " </span><span id='destination-display'> " + childSnapshot.val().destination +
+        " </span><span id='first-display'> " + childSnapshot.val().first +
+        " </span><span id='frequency-display'> " + childSnapshot.val().frequency + " </span></div>");
+
+    // Handle the errors
+    }, function(errorObject) {
+      console.log("Errors handled: " + errorObject.code);
+    });
+
+    dataRef.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
+
+      // Change the HTML to reflect
+      $("#name-display").html(snapshot.val().name);
+      $("#destination-display").html(snapshot.val().destination);
+      $("#first-display").html(snapshot.val().first);
+      $("#frequency-display").html(snapshot.val().frequency);
+    });
+
+    </script>
+
+  </body>
+
+</html>
+
