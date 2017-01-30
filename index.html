@@ -53,7 +53,7 @@
                 </div>
                 <div class="form-group">
                  <label for="frequency-input">Train Frequency</label>
-                 <input class="form-control" id="frequency-input" type="time">
+                 <input class="form-control" id="frequency-input" type="number">
                  </div>
                 <button class="btn btn-default" id="add-train" type="submit">Submit</button>
               </form>
@@ -86,7 +86,16 @@
               <h3 class="panel-title">All Trains</h3>
             </div>
             <div class="panel-body">
-                <div id="full-train-list"></div>
+                <!-- <div id="full-train-list"></div> -->
+              <table id="full-train-list">
+                <tr>
+                  <th width="20%">Train Name</th>
+                  <th width="20%">Train Destination</th>
+                  <th width="20%">First Train</th>
+                  <th width="20%">Train Frequency</th>
+                  <th width="20%">Next Train</th>
+                </tr>
+              </table> 
             </div>
           </div>
         </div>
@@ -158,10 +167,12 @@
       console.log(childSnapshot.val().joinDate);
 
       // full list of items to the well
-      $("#full-train-list").append("<div class='well'><span id='name'> " + childSnapshot.val().name +
-        " </span><span id='destination-display'> " + childSnapshot.val().destination +
-        " </span><span id='first-display'> " + childSnapshot.val().first +
-        " </span><span id='frequency-display'> " + childSnapshot.val().frequency + " </span></div>");
+    //  $("#full-train-list").append("<div class='well'><span id='name'> " + childSnapshot.val().name +
+    //    " </span><span id='destination-display'> " + childSnapshot.val().destination +
+     //   " </span><span id='first-display'> " + childSnapshot.val().first +
+   //     " </span><span id='frequency-display'> " + childSnapshot.val().frequency + " </span></div>");
+
+      $("#full-train-list").append("<tr><td width='auto'>" + childSnapshot.val().name + "</td><td width='auto'>" + childSnapshot.val().destination + "</td><td width='auto'>" + childSnapshot.val().first + "</td><td width='auto'>" + childSnapshot.val().frequency + "</td></tr>");
 
     // Handle the errors
     }, function(errorObject) {
