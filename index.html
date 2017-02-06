@@ -9,6 +9,7 @@
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
     <!-- LINK TO FIREBASE GOES HERE -->
 
     <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
@@ -80,23 +81,23 @@
         </div>
 
         <!-- Wells for displaying all users -->
-        <div class="col-lg-12">
-          <div class="panel panel-default">
+         <div class="col-lg-12">
+          <div class="panel panel-default" align="center">
             <div class="panel-heading">
               <h3 class="panel-title">All Trains</h3>
             </div>
-            <div class="panel-body">
+            <!-- <div class="panel-body"> -->
                 <!-- <div id="full-train-list"></div> -->
               <table id="full-train-list">
                 <tr>
-                  <th width="20%">Train Name</th>
-                  <th width="20%">Train Destination</th>
-                  <th width="20%">First Train</th>
-                  <th width="20%">Train Frequency</th>
-                  <th width="20%">Next Train</th>
+                  <th>Train Name</th>
+                  <th>Train Destination</th>
+                  <th>First Train</th>
+                  <th>Train Frequency</th>
+                  <th>Next Train</th>
                 </tr>
               </table> 
-            </div>
+            <!-- </div> -->
           </div>
         </div>
 
@@ -124,14 +125,16 @@
         firebase.initializeApp(config);
 
 
-      var dataRef = firebase.database();
+     var dataRef = firebase.database();
 
     // Initial Values
     var train = "";
     var destination = "";
     var first = 0;
-    var frequency = 0;
+    var tFrequency = "0";
 
+    
+    
     // Capture Button Click
     $("#add-train").on("click", function(event) {
       event.preventDefault();
@@ -141,22 +144,38 @@
       // Don't forget to provide initial data to your Firebase database.
       train = $("#name-input").val().trim();
       destination = $("#destination-input").val().trim();
-      first = $("#first-input").val().trim();
-      frequency = $("#frequency-input").val().trim();
+      first = $("#first-input").val().trim()     
+      tFrequency = $("#frequency-input").val().trim();
+      // firstConverted = moment(first, "hh:mm").subtract(1, "years")
+    var firstConverted = moment(first, "hh:mm").subtract(1, "years")
+    var currentTime = moment();
+    var diffTime = moment().diff(moment(firstConverted), "minutes");
+    var tRemainder = diffTime % tFrequency;
+    var tMinutesTillTrain = tFrequency - tRemainder;
+    var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+
+      console.log("First Converted: " + firstConverted);
+      console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+      console.log("DIFFERENCE IN TIME: " + diffTime);
+      console.log(tRemainder);
+      console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+      console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+
+
 
       // Code for the push
-      dataRef.ref().push({
+      dataRef.ref('Trains').push({
 
         name: train,
         destination: destination,
         first: first,
-        frequency: frequency,
+        frequency: tFrequency,
         dateAdded: firebase.database.ServerValue.TIMESTAMP
       });
     });
 
     // Firebase watcher + initial loader HINT: This code behaves similarly to .on("value")
-    dataRef.ref().on("child_added", function(childSnapshot) {
+    dataRef.ref("Trains").on("child_added", function(childSnapshot) {
 
       // Log everything that's coming out of snapshot
       console.log(childSnapshot.val().name);
@@ -166,21 +185,39 @@
       console.log(childSnapshot.val().frequency);
       console.log(childSnapshot.val().joinDate);
 
+     
       // full list of items to the well
     //  $("#full-train-list").append("<div class='well'><span id='name'> " + childSnapshot.val().name +
     //    " </span><span id='destination-display'> " + childSnapshot.val().destination +
      //   " </span><span id='first-display'> " + childSnapshot.val().first +
    //     " </span><span id='frequency-display'> " + childSnapshot.val().frequency + " </span></div>");
 
-      $("#full-train-list").append("<tr><td width='auto'>" + childSnapshot.val().name + "</td><td width='auto'>" + childSnapshot.val().destination + "</td><td width='auto'>" + childSnapshot.val().first + "</td><td width='auto'>" + childSnapshot.val().frequency + "</td></tr>");
+      $("#full-train-list").append("<tr><td width='auto'>" + childSnapshot.val().name + "</td><td width='auto'>" + childSnapshot.val().destination + "</td><td width='auto'>" + childSnapshot.val().first + "</td><td width='auto'>" + childSnapshot.val().frequency + "</td><td width='auto'>" + "tMinutesTillTrain" + "</td></tr>");
 
     // Handle the errors
     }, function(errorObject) {
       console.log("Errors handled: " + errorObject.code);
     });
 
-    dataRef.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
 
+var firstTrainRef = firebase.database().ref("Trains/").limitToFirst(1);
+
+var lastTrainRef = firebase.database().ref('Trains/').limitToLast(1);
+
+firstTrainRef.on("value", function(data) {
+   console.log(data.val());
+}, function (error) {
+   console.log("Error: " + error.code);
+});
+
+lastTrainRef.on("value", function(data) {
+   console.log(data.val());
+}, function (error) {
+   console.log("Error: " + error.code);
+});
+    
+    dataRef.ref("Trains").orderByChild("dateAdded").on("child_added", function(snapshot) {
+    
       // Change the HTML to reflect
       $("#name-display").html(snapshot.val().name);
       $("#destination-display").html(snapshot.val().destination);
